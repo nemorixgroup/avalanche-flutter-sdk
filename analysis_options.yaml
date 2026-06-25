@@ -1,0 +1,8 @@
+include: package:very_good_analysis/analysis_options.yaml
+
+linter:
+  rules:
+    # Allow fluent/builder pattern (return this) for SDK API
+    avoid_returning_this: false
+    # Allow constructors without const
+    prefer_const_constructors: false
