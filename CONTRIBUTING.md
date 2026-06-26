@@ -264,4 +264,6 @@ git push origin feature/cchain-client
 
 ## Questions?
 
-Open a [GitHub Discussion](https://github.com/nemorixgroup/avalanche-flutter-sdk/discussions) or reach out on the [Avalanche Discord](https://discord.gg/avalanche) `#dev-tools` channel.
+Open a [GitHub Discussion](https://github.com/nemorixgroup/avalanche-flutter-sdk/discussions),
+reach out on the [Avalanche Discord](https://discord.gg/avalanche) `#dev-tools` channel,
+or email us at sdks@nemorixpay.com

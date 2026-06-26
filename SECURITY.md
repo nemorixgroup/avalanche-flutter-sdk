@@ -10,7 +10,7 @@
 
 **Do NOT open a public GitHub issue for security vulnerabilities.**
 
-Email: **avalanche@nemorixpay.com**
+Email: **sdks@nemorixpay.com**
 
 Include in your report:
 - Description of the vulnerability
