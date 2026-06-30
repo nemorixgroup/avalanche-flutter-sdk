@@ -12,6 +12,10 @@ library avalanche_flutter_sdk;
 export 'src/client/avalanche_client.dart';
 export 'src/client/network_config.dart';
 
+// ---- Crypto ----
+export 'src/crypto/private_key.dart';
+export 'src/crypto/public_key.dart';
+
 // ---- Exceptions ----
 export 'src/exceptions/avalanche_exception.dart';
 
