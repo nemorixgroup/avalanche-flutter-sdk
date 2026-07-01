@@ -32,7 +32,7 @@ Pure Dart · No platform channels · Apache 2.0 · pub.dev
 ```yaml
 # pubspec.yaml
 dependencies:
-  avalanche_flutter_sdk: ^0.0.1-dev
+  avalanche_flutter_sdk: ^0.0.2-dev
 ```
 
 ```sh
