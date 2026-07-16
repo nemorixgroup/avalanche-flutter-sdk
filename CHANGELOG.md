@@ -5,6 +5,72 @@ All notable changes to avalanche_flutter_sdk will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.3-dev]
+
+Phase 1 in progress: BIP-39 mnemonic generation implemented and
+verified in English and Spanish.
+
+### Added
+
+- `MnemonicStrength`: enum with 5 valid BIP-39 entropy strengths
+  - `words12` (128 bits), `words15` (160 bits), `words18` (192 bits),
+    `words21` (224 bits), `words24` (256 bits)
+  - Computes `bits`, `bytes`, `checksumBits`, `totalBits`, `wordCount`
+    per BIP-39 formula: CS = ENT / 32, MS = (ENT + CS) / 11
+- `Entropy`: BIP-39 entropy generation and checksum computation
+  - `generate()`: cryptographically secure random bytes using
+    `FortunaRandom` + `Random.secure()` (consistent with `PrivateKey`)
+  - `validate()`: throws `ArgumentError` for invalid entropy sizes
+  - `computeChecksum()`: first ENT/32 bits of SHA256(entropy)
+  - `toBits()`: entropy + checksum as bit list for word index computation
+- `Wordlist`: abstract base class for BIP-39 wordlists
+  - `wordAt(index)`: returns word at index 0-2047
+  - `indexOf(word)`: binary search O(log n) - valid per BIP-39 sorted spec
+  - `contains(word)`: delegates to `indexOf`
+  - `validate()`: checks length == 2048 and words are sorted
+- `WordlistEn`: official BIP-39 English wordlist (2048 words)
+  - Singleton pattern: `WordlistEn.instance`
+  - Source: `github.com/bitcoin/bips/blob/master/bip-0039/english.txt`
+  - First word: `abandon` (index 0), last word: `zoo` (index 2047)
+- `WordlistEs`: official BIP-39 Spanish wordlist (2048 words)
+  - Singleton pattern: `WordlistEs.instance`
+  - Source: `github.com/bitcoin/bips/blob/master/bip-0039/spanish.txt`
+  - NFKD encoding (per BIP-39 spec); `wordAt()` returns NFC for callers
+  - Accent-insensitive lookup: `indexOf('abaco') == indexOf('ábaco')`
+  - HashMap-based O(1) lookup (binary search invalid for Spanish alphabet
+    where ñ follows n, not unicode order)
+  - Case-insensitive: `indexOf('Domingo') == indexOf('domingo')`
+- `Mnemonic`: BIP-39 mnemonic generation, import, and validation
+  - `Mnemonic.generate()`: generates from cryptographically secure entropy;
+    default 12 words English, configurable strength and wordlist
+  - `Mnemonic.fromEntropy()`: deterministic generation from entropy bytes
+  - `Mnemonic.fromPhrase()`: imports and validates existing phrase;
+    verifies BIP-39 checksum; accepts extra whitespace between words
+  - `toEntropy()`: reconstructs original entropy from word indices
+  - `toString()` returns `Mnemonic[REDACTED]` - phrase is equivalent
+    in sensitivity to a private key; use `phrase` getter explicitly
+- SDK Documentation & Knowledge Base link added to README
+- 192 new unit tests (77/77 → 192/192 total passing)
+
+### Verified
+
+- BIP-39 official test vectors (trezor/python-mnemonic/vectors.json):
+  - 128-bit all-zeros → `abandon abandon ... about` (12 words) ✅
+  - 128-bit 0x7f...7f → `legal winner ... yellow` (12 words) ✅
+  - 128-bit 0x80...80 → `letter advice ... above` (12 words) ✅
+  - 128-bit 0xff...ff → `zoo zoo ... wrong` (12 words) ✅
+  - 256-bit all-zeros → `abandon abandon ... art` (24 words) ✅
+- Spanish wordlist: 2048 words in NFKD encoding, accent-insensitive
+  lookup verified at runtime
+- `WordlistEn` binary search: `wordAt`/`indexOf` round-trip consistent
+  at indices 0, 1024, and 2047
+
+### Status
+
+Phase 1 in progress: BIP-39 mnemonics (EN + ES) complete and tested.  
+Not ready for production use.  
+Next: HD key derivation (BIP-44) + EVM and X/P-Chain address derivation.  
+
 ## 0.0.2-dev
 
 Phase 1 in progress: secp256k1 cryptography implemented and verified.
