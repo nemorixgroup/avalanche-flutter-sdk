@@ -20,19 +20,28 @@ Pure Dart · No platform channels · Apache 2.0 · pub.dev
 | AvalancheClient + NetworkConfig (Mainnet / Fuji) | ✅ Done |
 | secp256k1 PrivateKey / PublicKey | ✅ Done |
 | CB58 encoding / decoding | ✅ Done |
-| BIP-39 mnemonics (EN + ES) + HD derivation | 🔄 M1 |
+| BIP-39 mnemonics (EN + ES) | ✅ Done |
+| HD key derivation (BIP-44) | 🔄 M1 |
+| EVM + X/P-Chain address derivation | 🔄 M1 |
 | C-Chain EVM (EIP-1559, ERC-20/721/1155) | ⏳ M2 |
 | Data API / Glacier (REST + WebSocket) | ⏳ M3 |
 | P-Chain staking | ⏳ M4 |
 | X-Chain native assets | ⏳ M4 |
 
+## SDK Documentation & Knowledge Base
+
+This SDK is built on top of the [Avalanche Knowledge Base](https://github.com/nemorixgroup/Avalanche-Knowledge-Base), an in-depth guide to the Avalanche network covering consensus,
+architecture, multi-chain design, and the development ecosystem.
+Recommended reading before diving into the SDK internals.
+
+Every implementation decision behind this SDK - library choices, encoding standards, verification against official specs - is documented in [docs-sdk/](https://github.com/nemorixgroup/Avalanche-Knowledge-Base/tree/main/docs-sdk).
 
 ## Installation
 
 ```yaml
 # pubspec.yaml
 dependencies:
-  avalanche_flutter_sdk: ^0.0.2-dev
+  avalanche_flutter_sdk: ^0.0.3-dev
 ```
 
 ```sh
@@ -102,6 +111,37 @@ final privateKey = PrivateKey.generate();
 final exportString = 'PrivateKey-${CB58.encode(privateKey.toBytes())}';
 ```
 
+### BIP-39 Mnemonics (English + Spanish)
+
+```dart
+// Generate a 12-word English mnemonic (default)
+final mnemonic = Mnemonic.generate();
+print(mnemonic.phrase);
+// -> "abandon ability able about above absent absorb..."
+
+// Generate a 24-word Spanish mnemonic
+final mnemonicEs = Mnemonic.generate(
+  strength: MnemonicStrength.words24,
+  wordlist: WordlistEs.instance,
+);
+print(mnemonicEs.phrase);
+// -> "ábaco abdomen abeja abierto abogado..."
+
+// Import from existing phrase (validates checksum automatically)
+final imported = Mnemonic.fromPhrase(
+  'abandon abandon abandon abandon abandon abandon '
+  'abandon abandon abandon abandon abandon about',
+);
+
+// Reconstruct original entropy
+final entropy = imported.toEntropy();
+
+// Mnemonics are always redacted in logs
+print(mnemonic); // Mnemonic[REDACTED]
+// Use .phrase explicitly when display is intentional
+print(mnemonic.phrase); // the actual phrase
+```
+
 
 ## Networks
 
@@ -128,7 +168,7 @@ Licensed under [Apache 2.0](LICENSE).
 
 Este SDK esta siendo desarrollado con soporte nativo para la region:
 
-- Mnemonics BIP-39 en **espanol** (proximamente)
+- Mnemonics BIP-39 en **español** ✅ disponible desde v0.0.3-dev
 - Caso de uso principal: remesas **Estados Unidos hacia Latinoamerica**
 - Desarrollado por [Nemorix Group](https://nemorixpay.com), Ohio, USA
 
