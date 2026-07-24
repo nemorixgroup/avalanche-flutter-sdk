@@ -5,6 +5,72 @@ All notable changes to avalanche_flutter_sdk will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0-dev]
+
+Phase 1 complete: full wallet cycle implemented and verified.
+Given a mnemonic, the SDK can now derive addresses for all three
+Avalanche chains (C-Chain, X-Chain, P-Chain).
+
+### Added
+
+- `Seed`: BIP-39 seed derivation via PBKDF2-HMAC-SHA512
+  - `Seed.fromMnemonic()`: derives 512-bit seed from a `Mnemonic`
+    instance with optional passphrase
+  - `Seed.fromPhrase()`: derives from raw phrase string
+  - Password and salt normalized to UTF-8 NFKD per BIP-39 spec
+  - `toString()` returns `Seed[REDACTED]`
+- `HDWallet`: BIP-32/BIP-44 hierarchical deterministic wallet
+  - `HDWallet.fromSeed()`: derives master key via
+    `HMAC-SHA512(key="Bitcoin seed", data=seed)`
+  - `HDWallet.fromMnemonic()`: convenience constructor
+  - `derivePrivateKeyForCChain(index)`: path `m/44'/60'/0'/0/n`
+    (coin_type=60, EVM-compatible, Core Wallet + MetaMask)
+  - `derivePrivateKeyForXPChain(index)`: path `m/44'/9000'/0'/0/n`
+    (coin_type=9000, Avalanche native)
+  - `derivePublicKeyForCChain(index)` and
+    `derivePublicKeyForXPChain(index)` convenience methods
+  - `toString()` returns `HDWallet[REDACTED]`
+- `EvmAddress`: C-Chain EVM address derivation
+  - `EvmAddress.fromPublicKey()`: keccak256(toRawUncompressed())
+    → last 20 bytes
+  - `checksumAddress`: EIP-55 mixed-case checksum with `0x` prefix
+  - `lowercaseAddress`: lowercase hex with `0x` prefix
+  - `EvmAddress.fromHex()`: import from hex string
+- `XPAddress`: X-Chain and P-Chain Bech32 address derivation
+  - `XPAddress.fromPublicKey()`: SHA256(compressed) → RIPEMD160
+    → 20 bytes → Bech32
+  - `xChainAddress(network)`: `X-avax1{bech32}` (mainnet) or
+    `X-fuji1{bech32}` (testnet)
+  - `pChainAddress(network)`: `P-avax1{bech32}` (mainnet) or
+    `P-fuji1{bech32}` (testnet)
+  - `AvalancheNetwork` enum: `mainnet` (hrp=`avax`),
+    `fuji` (hrp=`fuji`)
+- 46 new unit tests (208/208 → 254/254 total passing)
+
+### Verified
+
+- PBKDF2 seed derivation verified against 3 official Trezor
+  test vectors (trezor/python-mnemonic/vectors.json, passphrase="TREZOR"):
+  - `abandon x11 + about` → `c55257...3b04` 
+  - `legal winner...yellow` → `2e8905...f607` 
+  - `letter advice...above` → `d71de8...52a8` 
+- BIP-44 derivation paths verified from Core Wallet official docs:
+  `support.core.app/en/articles/7004986`
+- EIP-55 checksum verified against 4 official test vectors
+  (`eips.ethereum.org/EIPS/eip-55`):
+  - `0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed` 
+  - `0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359` 
+  - `0xdbF03B407c01E7cD3CBea99509d93f8DDDC8C6FB` 
+  - `0xD1220A0cf47c7B9Be7A2E6BA89F429762e7b9aDb` 
+- X/P-Chain address algorithm verified from official Avalanche spec:
+  `docs.avax.network/docs/rpcs/other/standards/cryptographic-primitives`
+
+### Status
+
+Phase 1 complete: full wallet cycle operational.  
+Not ready for production use.  
+Next: Phase 2 -> C-Chain JSON-RPC client (EIP-1559 transfers, ERC-20).  
+
 ## [0.0.3-dev]
 
 Phase 1 in progress: BIP-39 mnemonic generation implemented and
