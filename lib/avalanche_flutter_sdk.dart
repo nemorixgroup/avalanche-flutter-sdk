@@ -12,7 +12,16 @@ library avalanche_flutter_sdk;
 export 'src/client/avalanche_client.dart';
 export 'src/client/network_config.dart';
 
-// ---- Crypto ----
+// ---- Crypto: Address ----
+export 'src/crypto/address/evm_address.dart';
+export 'src/crypto/address/xp_address.dart';
+
+// ---- Crypto: HD Wallet ----
+export 'src/crypto/hd/hd_wallet.dart';
+export 'src/crypto/hd/seed.dart';
+
+// ---- Crypto: Keys ----
+// ignore: directives_ordering
 export 'src/crypto/cb58.dart';
 export 'src/crypto/mnemonic/entropy.dart';
 export 'src/crypto/mnemonic/mnemonic.dart';

@@ -1,4 +1,6 @@
+import 'phase1/address_derivation_example.dart';
 import 'phase1/network_config_example.dart';
+import 'phase1/wallet_generation_example.dart';
 
 /// avalanche_flutter_sdk - Quick Start Examples
 ///
@@ -24,6 +26,10 @@ Future<void> main() async {
 
   // AvalancheClient setup, NetworkConfig (Mainnet / Fuji Testnet), NetworkId
   await networkConfigExamples();
+  // Avalanche Address Derivation (C-Chain, X-Chain, P-Chain)
+  addressDerivationExample();
+  // BIP-39 Wallet Generation for Avalanche
+  walletGenerationExample();
 
   // ---- Phase 2: Cryptography + Wallet (coming in M1) ----
   // secp256k1 key generation, BIP-39 mnemonics (EN + ES),
