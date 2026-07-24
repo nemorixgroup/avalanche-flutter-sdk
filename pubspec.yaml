@@ -1,6 +1,6 @@
 name: avalanche_flutter_sdk
 description: "The first native Flutter/Dart SDK for the Avalanche network. Pure Dart, no platform channels. Covers C-Chain EVM, Data API (Glacier), P-Chain staking, and X-Chain native assets."
-version: 0.0.3-dev
+version: 0.1.0-dev
 homepage: https://github.com/nemorixgroup/avalanche-flutter-sdk
 repository: https://github.com/nemorixgroup/avalanche-flutter-sdk
 issue_tracker: https://github.com/nemorixgroup/avalanche-flutter-sdk/issues
