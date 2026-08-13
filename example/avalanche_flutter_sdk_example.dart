@@ -1,6 +1,7 @@
 import 'phase1/address_derivation_example.dart';
 import 'phase1/network_config_example.dart';
 import 'phase1/wallet_generation_example.dart';
+import 'phase2/cchain_read_example.dart';
 
 /// avalanche_flutter_sdk - Quick Start Examples
 ///
@@ -22,6 +23,7 @@ import 'phase1/wallet_generation_example.dart';
 ///   Phase 4 - P-Chain + X-Chain (staking, UTXO, cross-chain)
 Future<void> main() async {
   // ---- Phase 1: Architecture + Network Configuration ----
+  // Cryptography + Wallet (coming in M1)
   // See: example/phase1/
 
   // AvalancheClient setup, NetworkConfig (Mainnet / Fuji Testnet), NetworkId
@@ -31,19 +33,17 @@ Future<void> main() async {
   // BIP-39 Wallet Generation for Avalanche
   walletGenerationExample();
 
-  // ---- Phase 2: Cryptography + Wallet (coming in M1) ----
-  // secp256k1 key generation, BIP-39 mnemonics (EN + ES),
-  // HD key derivation (BIP-44: m/44'/60'/0'/0/n), EVM address derivation
-
-  // ---- Phase 3: C-Chain Core EVM (coming in M2) ----
+  // ---- Phase 2: C-Chain Core EVM (coming in M2) ----
   // EIP-1559 AVAX transfer, ERC-20 transfers, gas estimation,
   // eth_sendRawTransaction, eth_getTransactionReceipt
+  // See: example/phase2/
+  await cchainReadExample();
 
-  // ---- Phase 4: Data API / Glacier (coming in M3) ----
+  // ---- Phase 3: Data API / Glacier (coming in M3) ----
   // GlacierClient REST, balance queries, transaction history,
   // NFT metadata (ERC-721/1155), WebSocket real-time subscriptions
 
-  // ---- Phase 5: P-Chain + X-Chain (coming in M4) ----
+  // ---- Phase 4: P-Chain + X-Chain (coming in M4) ----
   // P-Chain staking, validator queries, AddDelegatorTransaction,
   // X-Chain UTXO transfers, cross-chain export/import
 }
