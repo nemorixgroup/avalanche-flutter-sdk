@@ -1,3 +1,5 @@
+// ignore_for_file: directives_ordering
+
 /// The first native Flutter/Dart SDK for the Avalanche network.
 ///
 /// Pure Dart implementation covering:
@@ -7,6 +9,12 @@
 /// - X-Chain (UTXO native asset transfers, cross-chain)
 /// - Cryptography (secp256k1, CB58, BIP-39 EN/ES, HD key derivation)
 library avalanche_flutter_sdk;
+
+// ---- Chains: C-Chain ----
+export 'src/chains/cchain/cchain_client.dart';
+export 'src/chains/cchain/gas_estimator.dart';
+export 'src/chains/cchain/models/gas_price_option.dart';
+export 'src/chains/cchain/models/gas_price_options.dart';
 
 // ---- Client ----
 export 'src/client/avalanche_client.dart';
@@ -21,7 +29,6 @@ export 'src/crypto/hd/hd_wallet.dart';
 export 'src/crypto/hd/seed.dart';
 
 // ---- Crypto: Keys ----
-// ignore: directives_ordering
 export 'src/crypto/cb58.dart';
 export 'src/crypto/mnemonic/entropy.dart';
 export 'src/crypto/mnemonic/mnemonic.dart';
