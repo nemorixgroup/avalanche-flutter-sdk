@@ -1,5 +1,3 @@
-import 'dart:math';
-
 // ---- GasPriceOption ----
 
 /// A single gas price option for an EIP-1559 transaction on Avalanche C-Chain.
@@ -34,10 +32,10 @@ class GasPriceOption {
 
   /// Returns [maxPriorityFeePerGas] in nAVAX (Gwei equivalent).
   double get maxPriorityFeePerGasInNAvax =>
-      maxPriorityFeePerGas / BigInt.from(pow(10, 9));
+      maxPriorityFeePerGas.toDouble() / 1e9;
 
   /// Returns [maxFeePerGas] in nAVAX (Gwei equivalent).
-  double get maxFeePerGasInNAvax => maxFeePerGas / BigInt.from(pow(10, 9));
+  double get maxFeePerGasInNAvax => maxFeePerGas.toDouble() / 1e9;
 
   @override
   String toString() =>
