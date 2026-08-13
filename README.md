@@ -10,7 +10,8 @@ The first native Flutter/Dart SDK for the Avalanche network.
 Pure Dart · No platform channels · Apache 2.0 · pub.dev  
 
 > ⚠️ **Status: Early Development** - API is not stable.  
-> Phase 1 complete: full wallet cycle (mnemonic → seed → HD wallet → addresses).
+> Phase 1 complete: full wallet cycle (mnemonic > seed > HD wallet > addresses).
+> Current: Phase 2 C-Chain Core.
 
 
 ## Planned Features (v1.0.0)
@@ -24,8 +25,8 @@ Pure Dart · No platform channels · Apache 2.0 · pub.dev
 | HD key derivation (BIP-44) | ✅ Done |
 | EVM address derivation (C-Chain) | ✅ Done |
 | X/P-Chain address derivation | ✅ Done |
-| C-Chain JSON-RPC client (eth_getBalance, eth_getTransactionCount) | 🔄 M2 |
-| AVAX transfers (EIP-1559, signing, broadcast) | ⏳ M2 |
+| C-Chain JSON-RPC client (eth_getBalance, eth_getTransactionCount) | ✅ Done |
+| AVAX transfers (EIP-1559, signing, broadcast) | 🔄 M2 |
 | ERC-20 transfers (USDC, USDT, approve, allowance) | ⏳ M2 |
 | Glacier REST client (balances, transaction history) | ⏳ M3 |
 | Glacier WebSocket (real-time events, subscriptions) | ⏳ M3 |
@@ -51,7 +52,7 @@ documented in [docs-sdk/](https://github.com/nemorixgroup/Avalanche-Knowledge-Ba
 ```yaml
 # pubspec.yaml
 dependencies:
-  avalanche_flutter_sdk: ^0.1.0-dev
+  avalanche_flutter_sdk: ^0.1.1-dev
 ```
 
 ```sh
@@ -174,6 +175,31 @@ print(xpAddress.pChainAddress()); // P-avax1...
 print(wallet); // HDWallet[REDACTED]
 ```
 
+### C-Chain - Read Operations
+
+```dart
+import 'package:avalanche_flutter_sdk/avalanche_flutter_sdk.dart';
+
+// Connect to Fuji Testnet
+final client = CChainClient(network: NetworkConfig.fuji);
+
+// Read AVAX balance (returns Wei - divide by 10^18 for AVAX)
+final balance = await client.getBalance('0x71C7656EC7...');
+print(balance); // e.g. 1000000000000000000 (= 1 AVAX)
+
+// Read nonce (required for signing transactions)
+final nonce = await client.getTransactionCount('0x71C7656EC7...');
+
+// Get gas price options (Avalanche-specific)
+final estimator = GasEstimator(client);
+final options = await estimator.getPriceOptions();
+print(options.normal.maxFeePerGas); // in Wei
+print(options.fast.maxFeePerGas);   // in Wei
+
+// Estimate fee for a simple AVAX transfer
+final fee = await estimator.estimateTransferFee();
+print(fee); // maxFeePerGas * 21000 gas units
+```
 
 ## Networks
 

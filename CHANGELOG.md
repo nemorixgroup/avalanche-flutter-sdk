@@ -5,6 +5,62 @@ All notable changes to avalanche_flutter_sdk will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1-dev]
+
+Phase 2 started: C-Chain JSON-RPC client and EIP-1559 gas
+estimation implemented and verified against official Avalanche
+documentation.
+
+### Added
+
+- `CChainClient`: JSON-RPC client for the Avalanche C-Chain
+  - `getBalance(address)`: AVAX balance in Wei (`eth_getBalance`)
+  - `getTransactionCount(address)`: nonce (`eth_getTransactionCount`)
+  - `getBlockNumber()`: latest accepted block (`eth_blockNumber`)
+  - `getTransactionReceipt(txHash)`: receipt or null
+  - `getBaseFee()`: next block base fee in Wei (`eth_baseFee`,
+    Avalanche-specific)
+  - `getMaxPriorityFeePerGas()`: tip in Wei
+    (`eth_maxPriorityFeePerGas`)
+  - `suggestPriceOptions()`: slow/normal/fast gas options
+    (`eth_suggestPriceOptions`, Avalanche-specific)
+  - `estimateGas({to, from, value, data})`: gas units
+    (`eth_estimateGas`)
+  - Throws `AvalancheException` on RPC and HTTP errors
+- `GasEstimator`: higher-level EIP-1559 gas estimation
+  - `getPriceOptions()`: delegates to `eth_suggestPriceOptions`
+  - `getBaseFee()`: delegates to `eth_baseFee`
+  - `getOption(GasSpeed)`: returns single tier (slow/normal/fast)
+  - `estimateTransferFee(speed)`: maxFeePerGas × 21,000 gas units
+  - `avaxTransferGasLimit`: 21,000 (standard EVM transfer cost)
+- `GasPriceOption`: EIP-1559 fee model for a single speed tier
+  - `maxPriorityFeePerGas` and `maxFeePerGas` in Wei
+  - `effectiveFee(baseFee)`:
+    `min(maxFeePerGas, baseFee + maxPriorityFeePerGas)`
+  - `maxPriorityFeePerGasInNAvax` and `maxFeePerGasInNAvax` helpers
+- `GasPriceOptions`: container for slow, normal, and fast tiers
+- `GasSpeed` enum: `slow`, `normal`, `fast`
+- 24 new unit tests (254/254 -> 278/278 total passing)
+
+### Verified
+
+- `eth_suggestPriceOptions` response format verified against
+  official example from
+  `build.avax.network/docs/rpcs/c-chain#eth_suggestpriceoptions`
+- EIP-1559 effective fee formula verified:
+  `min(gasFeeCap, baseFee + gasTipCap)` per
+  `build.avax.network/docs/rpcs/other/guides/txn-fees`
+- Avalanche burns both base fee AND priority fee (unlike Ethereum
+  where priority fee goes to validators)
+- Minimum base fee: 1 nAVAX (1 Gwei = 10^9 Wei)
+
+### Status
+
+Phase 2 in progress: C-Chain read operations available.  
+Not ready for production use.  
+Next: `AvaxTransferTransaction` (EIP-1559 signing and broadcast)
+-> v0.1.2-dev
+
 ## [0.1.0-dev]
 
 Phase 1 complete: full wallet cycle implemented and verified.
