@@ -15,10 +15,14 @@ export 'src/chains/cchain/cchain_client.dart';
 export 'src/chains/cchain/gas_estimator.dart';
 export 'src/chains/cchain/models/gas_price_option.dart';
 export 'src/chains/cchain/models/gas_price_options.dart';
+export 'src/chains/cchain/transaction/avax_transfer_tx.dart';
 
 // ---- Client ----
 export 'src/client/avalanche_client.dart';
 export 'src/client/network_config.dart';
+
+// ---- Crypto ----
+export 'src/crypto/ecdsa_signature.dart';
 
 // ---- Crypto: Address ----
 export 'src/crypto/address/evm_address.dart';
