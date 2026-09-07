@@ -5,6 +5,59 @@ All notable changes to avalanche_flutter_sdk will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2-dev]
+
+Phase 2 continued: EIP-1559 AVAX transfers implemented, signed,
+and verified on Fuji Testnet. First on-chain write operation
+from avalanche_flutter_sdk.
+
+### Added
+
+- `EcdsaSignature`: secp256k1 signature model with `r`, `s`, `v`
+  - `v`: recovery id (0 or 1) - EIP-1559 `signatureYParity`
+    (not legacy 27/28)
+- `PrivateKey.signDigest(Uint8List digest)`: signs a 32-byte digest
+  - RFC 6979 deterministic nonce (HMAC-SHA256 via `ECDSASigner`)
+  - Low-S normalization: prevents signature malleability
+  - Recovery id computed by recovering public key from signature
+- `RlpEncoder`: Recursive Length Prefix encoding from scratch
+  - Supports `BigInt`, `int`, `Uint8List`, and nested `List`
+  - Zero encodes as empty bytes (0x80) per RLP spec
+  - No external dependencies (~80 lines of pure Dart)
+- `AvaxTransferTransaction`: EIP-1559 AVAX transfer builder and signer
+  - `unsignedHash()`: `keccak256(0x02 || RLP([unsigned fields]))`
+  - `sign(PrivateKey)`: returns hex raw transaction starting with `0x02`
+  - Compatible with Core Wallet, MetaMask, and all EVM tools
+- `CChainClient.sendRawTransaction(rawTx)`: broadcasts signed transaction
+  (`eth_sendRawTransaction`) - returns transaction hash
+- `example/phase2/generate_wallets_example.dart`: generates sender
+  and receiver wallets for Fuji Testnet testing
+- `example/phase2/avax_transfer_example.dart`: end-to-end EIP-1559
+  AVAX transfer on Fuji Testnet
+- 0 new unit tests (323/323 total) - verified on-chain instead
+
+### Verified on-chain (Fuji Testnet)
+
+First real transaction from avalanche_flutter_sdk:
+```
+TX Hash : 0x43f9d7b50013a5b18b0c1b6eda82875a39f7e7a01d114fa62595ced6f52d1ff2
+Block : 58,211,707
+Status : Success ✅
+Amount : 0.001 AVAX
+Gas used : 21,000 units (standard EVM transfer)
+Confirmed: ~2 seconds (Avalanche Snowman consensus)
+Explorer : https://testnet.snowtrace.io/tx/0x43f9d7b50013a5b18b0c1b6eda82875a39f7e7a01d114fa62595ced6f52d1ff2
+```
+
+SDK compatibility with Core Wallet confirmed:
+same mnemonic -> same address derivation ✅
+
+### Status
+
+Phase 2 in progress: AVAX transfers operational on Fuji Testnet.  
+Not ready for production use.  
+Next: ERC-20 transfers (USDC, USDT) -> v0.2.0-dev
+
 ## [0.1.1-dev]
 
 Phase 2 started: C-Chain JSON-RPC client and EIP-1559 gas

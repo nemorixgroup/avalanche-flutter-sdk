@@ -242,4 +242,23 @@ class CChainClient {
       maxFeePerGas: _hexToBigInt(map['maxFeePerGas'] as String),
     );
   }
+
+  /// Broadcasts a signed raw transaction to the network.
+  ///
+  /// Uses `eth_sendRawTransaction`. [rawTx] must be the hex-encoded signed
+  /// transaction string starting with `0x02` (produced by
+  /// `AvaxTransferTransaction.sign`).
+  ///
+  /// Returns the transaction hash on success.
+  /// Call [getTransactionReceipt] to confirm inclusion in a block.
+  ///
+  /// Source:
+  /// https://build.avax.network/docs/rpcs/c-chain
+  Future<String> sendRawTransaction(String rawTx) async {
+    final result = await _call(
+      method: 'eth_sendRawTransaction',
+      params: [rawTx],
+    );
+    return result as String;
+  }
 }
