@@ -1,7 +1,9 @@
 import 'phase1/address_derivation_example.dart';
 import 'phase1/network_config_example.dart';
 import 'phase1/wallet_generation_example.dart';
+import 'phase2/avax_transfer_example.dart';
 import 'phase2/cchain_read_example.dart';
+import 'phase2/generate_wallets_example.dart';
 
 /// avalanche_flutter_sdk - Quick Start Examples
 ///
@@ -38,6 +40,12 @@ Future<void> main() async {
   // eth_sendRawTransaction, eth_getTransactionReceipt
   // See: example/phase2/
   await cchainReadExample();
+
+  // Generate Fuji Testnet wallets for testing.
+  await generateWalletsExample();
+
+  // AVAX Transfer on Fuji Testnet
+  await avaxTransferExample();
 
   // ---- Phase 3: Data API / Glacier (coming in M3) ----
   // GlacierClient REST, balance queries, transaction history,
