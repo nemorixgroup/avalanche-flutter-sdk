@@ -4,14 +4,14 @@
 [![Dart](https://img.shields.io/badge/Dart-3.x-teal.svg)](https://dart.dev)
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-blue.svg)](https://flutter.dev)
 [![CI](https://github.com/nemorixgroup/avalanche-flutter-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/nemorixgroup/avalanche-flutter-sdk/actions)
-[![Status](https://img.shields.io/badge/Status-Phase%201%20Complete-green.svg)]()
+[![Status](https://img.shields.io/badge/Status-Phase%202%20In%20Progress-orange.svg)]()
 
 The first native Flutter/Dart SDK for the Avalanche network.  
 Pure Dart · No platform channels · Apache 2.0 · pub.dev  
 
 > ⚠️ **Status: Early Development** - API is not stable.  
-> Phase 1 complete: full wallet cycle (mnemonic > seed > HD wallet > addresses).
-> Current: Phase 2 C-Chain Core.
+> Phase 1 complete: full wallet cycle (mnemonic -> seed -> HD wallet -> addresses).  
+> Current: Phase 2 C-Chain Core - AVAX transfers verified on Fuji Testnet.
 
 
 ## Planned Features (v1.0.0)
@@ -26,8 +26,8 @@ Pure Dart · No platform channels · Apache 2.0 · pub.dev
 | EVM address derivation (C-Chain) | ✅ Done |
 | X/P-Chain address derivation | ✅ Done |
 | C-Chain JSON-RPC client (eth_getBalance, eth_getTransactionCount) | ✅ Done |
-| AVAX transfers (EIP-1559, signing, broadcast) | 🔄 M2 |
-| ERC-20 transfers (USDC, USDT, approve, allowance) | ⏳ M2 |
+| AVAX transfers (EIP-1559, signing, broadcast) | ✅ Done |
+| ERC-20 transfers (USDC, USDT, approve, allowance) | 🔄 Next |
 | Glacier REST client (balances, transaction history) | ⏳ M3 |
 | Glacier WebSocket (real-time events, subscriptions) | ⏳ M3 |
 | ERC-721 / ERC-1155 (NFT metadata, ownership) | ⏳ M3 |
@@ -52,7 +52,7 @@ documented in [docs-sdk/](https://github.com/nemorixgroup/Avalanche-Knowledge-Ba
 ```yaml
 # pubspec.yaml
 dependencies:
-  avalanche_flutter_sdk: ^0.1.1-dev
+  avalanche_flutter_sdk: ^0.1.2-dev
 ```
 
 ```sh
@@ -165,7 +165,7 @@ print(cAddress.lowercaseAddress);
 // Path: m/44'/9000'/0'/0/n
 final xpPubKey  = wallet.derivePublicKeyForXPChain(index: 0);
 final xpAddress = XPAddress.fromPublicKey(xpPubKey);
-print(xpAddress.xChainAddress());                              // X-avax1...
+print(xpAddress.xChainAddress());                               // X-avax1...
 print(xpAddress.xChainAddress(network: AvalancheNetwork.fuji)); // X-fuji1...
 
 // P-Chain address (same key as X-Chain, different prefix)
@@ -178,8 +178,6 @@ print(wallet); // HDWallet[REDACTED]
 ### C-Chain - Read Operations
 
 ```dart
-import 'package:avalanche_flutter_sdk/avalanche_flutter_sdk.dart';
-
 // Connect to Fuji Testnet
 final client = CChainClient(network: NetworkConfig.fuji);
 
@@ -194,19 +192,58 @@ final nonce = await client.getTransactionCount('0x71C7656EC7...');
 final estimator = GasEstimator(client);
 final options = await estimator.getPriceOptions();
 print(options.normal.maxFeePerGas); // in Wei
-print(options.fast.maxFeePerGas);   // in Wei
 
 // Estimate fee for a simple AVAX transfer
 final fee = await estimator.estimateTransferFee();
 print(fee); // maxFeePerGas * 21000 gas units
 ```
 
+### C-Chain - AVAX Transfer (EIP-1559)
+
+```dart
+// Build and sign an EIP-1559 AVAX transfer
+final client    = CChainClient(network: NetworkConfig.fuji);
+final estimator = GasEstimator(client);
+final wallet    = HDWallet.fromMnemonic(mnemonic);
+final privateKey = wallet.derivePrivateKeyForCChain();
+final address    = EvmAddress.fromPublicKey(
+    wallet.derivePublicKeyForCChain()).checksumAddress;
+
+// Read on-chain state
+final nonce   = await client.getTransactionCount(address);
+final options = await estimator.getPriceOptions();
+
+// Build transaction
+final tx = AvaxTransferTransaction(
+  chainId:              43113, // Fuji Testnet
+  nonce:                nonce,
+  maxPriorityFeePerGas: options.normal.maxPriorityFeePerGas,
+  maxFeePerGas:         options.normal.maxFeePerGas,
+  gasLimit:             BigInt.from(21000),
+  to:                   '0xRECEIVER_ADDRESS',
+  value:                BigInt.parse('1000000000000000'), // 0.001 AVAX
+);
+
+// Sign and broadcast
+final rawTx  = tx.sign(privateKey);
+final txHash = await client.sendRawTransaction(rawTx);
+print('TX Hash: $txHash');
+// -> 0x43f9d7b50013a5b18b0c1b6eda82875a39f7e7a01d114fa62595ced6f52d1ff2
+
+// Wait for confirmation
+final receipt = await client.getTransactionReceipt(txHash);
+print(receipt?['status']); // 0x1 = success
+```
+
+> Verified on Fuji Testnet - block 58,211,707 - confirmed in ~2 seconds ✅
+
+
 ## Networks
 
 | Network | Chain ID | C-Chain RPC |
 |---|---|---|
-| Mainnet | 1 | `https://api.avax.network/ext/bc/C/rpc` |
-| Fuji Testnet | 5 | `https://api.avax-test.network/ext/bc/C/rpc` |
+| Mainnet | 43114 | `https://api.avax.network/ext/bc/C/rpc` |
+| Fuji Testnet | 43113 | `https://api.avax-test.network/ext/bc/C/rpc` |
 
 
 ## Contributing
@@ -228,6 +265,7 @@ Este SDK esta siendo desarrollado con soporte nativo para la region:
 
 - Mnemonics BIP-39 en **español** ✅ disponible desde v0.0.3-dev
 - HD wallet + direcciones en las 3 chains ✅ disponible desde v0.1.0-dev
+- Transferencias AVAX en Fuji Testnet ✅ disponible desde v0.1.2-dev
 - Caso de uso principal: remesas **Estados Unidos hacia Latinoamerica**
 - Desarrollado por [Nemorix Group](https://nemorixpay.com), Ohio, USA
 
