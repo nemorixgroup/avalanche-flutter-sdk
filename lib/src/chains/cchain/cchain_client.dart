@@ -71,6 +71,26 @@ class CChainClient {
 
   // ---- Public API: Block ----
 
+  /// Executes a read-only call to a smart contract via `eth_call`.
+  ///
+  /// Used internally for ERC-20 read operations (balanceOf, decimals, etc.)
+  /// Returns the result as a hex string.
+  ///
+  /// Source: https://build.avax.network/docs/rpcs/c-chain
+  Future<String> ethCall({
+    required String to,
+    required String data,
+  }) async {
+    final result = await _call(
+      method: 'eth_call',
+      params: [
+        {'to': to, 'data': data},
+        'latest',
+      ],
+    );
+    return result as String;
+  }
+
   /// Returns the number of the most recently accepted block.
   ///
   /// Uses `eth_blockNumber`.

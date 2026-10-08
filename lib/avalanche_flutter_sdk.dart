@@ -16,6 +16,8 @@ export 'src/chains/cchain/gas_estimator.dart';
 export 'src/chains/cchain/models/gas_price_option.dart';
 export 'src/chains/cchain/models/gas_price_options.dart';
 export 'src/chains/cchain/transaction/avax_transfer_tx.dart';
+export 'src/chains/cchain/erc20/erc20_client.dart';
+export 'src/chains/cchain/erc20/erc20_constants.dart';
 
 // ---- Client ----
 export 'src/client/avalanche_client.dart';

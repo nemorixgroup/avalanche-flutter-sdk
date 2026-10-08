@@ -37,6 +37,7 @@ class AvaxTransferTransaction {
     required this.gasLimit,
     required this.to,
     required this.value,
+    this.data,
   });
 
   // ---- Fields ----
@@ -69,6 +70,12 @@ class AvaxTransferTransaction {
   /// The amount of AVAX to transfer in Wei (10^18 Wei = 1 AVAX).
   final BigInt value;
 
+  /// Optional calldata for contract interactions.
+  ///
+  /// For simple AVAX transfers this is `null` (encoded as empty bytes).
+  /// For ERC-20 interactions this contains the ABI-encoded function call.
+  final Uint8List? data;
+
   // ---- Public API ----
 
   /// Computes the signing hash for this transaction.
@@ -97,6 +104,8 @@ class AvaxTransferTransaction {
     final sig = privateKey.signDigest(hash);
 
     final toBytes = _addressToBytes(to);
+    final dataBytes = data ?? Uint8List(0);
+
     final signedRlp = RlpEncoder.encode([
       BigInt.from(chainId),
       BigInt.from(nonce),
@@ -105,7 +114,7 @@ class AvaxTransferTransaction {
       gasLimit,
       toBytes,
       value,
-      Uint8List(0), // data: empty for AVAX transfer
+      dataBytes,
       <dynamic>[], // accessList: empty for AVAX transfer
       BigInt.from(sig.v), // signatureYParity: 0 or 1 (EIP-1559)
       sig.r,
@@ -123,6 +132,7 @@ class AvaxTransferTransaction {
 
   Uint8List _buildUnsignedPayload() {
     final toBytes = _addressToBytes(to);
+    final dataBytes = data ?? Uint8List(0); // null -> empty bytes
     final unsignedRlp = RlpEncoder.encode([
       BigInt.from(chainId),
       BigInt.from(nonce),
@@ -131,7 +141,7 @@ class AvaxTransferTransaction {
       gasLimit,
       toBytes,
       value,
-      Uint8List(0), // data
+      dataBytes,
       <dynamic>[], // accessList
     ]);
 
@@ -158,3 +168,12 @@ class AvaxTransferTransaction {
     );
   }
 }
+
+// ---- ERC20Transaction ----
+
+/// An EIP-1559 transaction for ERC-20 contract interactions.
+///
+/// Same as [AvaxTransferTransaction] but with:
+/// - `value` always zero (no AVAX sent)
+/// - `data` contains the ABI-encoded ERC-20 function call
+typedef ERC20Transaction = AvaxTransferTransaction;
