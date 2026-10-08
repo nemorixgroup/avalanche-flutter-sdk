@@ -5,6 +5,64 @@ All notable changes to avalanche_flutter_sdk will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0-dev]
+
+Phase 2 complete: ERC-20 token transfers implemented, signed,
+and verified on Fuji Testnet.  
+
+### Added
+
+- `ERC20Constants`: ERC-20 function selectors and official token addresses
+  - Selectors (keccak256 verified): `transfer` (0xa9059cbb),
+    `balanceOf` (0x70a08231), `approve` (0x095ea7b3),
+    `allowance` (0xdd62ed3e), `transferFrom` (0x23b872dd),
+    `decimals` (0x313ce567), `symbol` (0x95d89b41)
+  - USDC Mainnet: `0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E`
+  - USDC Fuji: `0x5425890298aed601595a70AB815c96711a31Bc65`
+  - USDT Mainnet: `0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7`
+  - Source: developers.circle.com/stablecoins/usdc-contract-addresses
+- `ERC20Client`: ERC-20 token interactions for Avalanche C-Chain
+  - Read operations via `eth_call`:
+    - `balanceOf(tokenAddress, ownerAddress)`: balance in smallest unit
+    - `decimals(tokenAddress)`: token decimals (USDC = 6)
+    - `symbol(tokenAddress)`: token symbol (e.g. "USDC")
+    - `allowance(tokenAddress, ownerAddress, spenderAddress)`: allowance
+  - Write operations via signed EIP-1559 transactions:
+    - `transfer(tokenAddress, toAddress, amount, ...)`: token transfer
+    - `approve(tokenAddress, spenderAddress, amount, ...)`: approve spender
+    - `transferFrom(tokenAddress, fromAddress, toAddress, amount, ...)`:
+      delegated transfer
+  - ABI encoding from scratch (no external library):
+    - `address`: 32 bytes left-padded with zeros
+    - `uint256`: big-endian 32 bytes
+    - `string`: offset(32) + length(32) + UTF-8 data
+- `CChainClient.ethCall()`: public method for read-only contract calls
+- `AvaxTransferTransaction`: added optional `data` field (`Uint8List?`)
+  for contract interactions. Fixes RLP encoding bug where duplicate
+  `Uint8List(0)` caused extra `0x80` byte before `accessList`
+- `typedef ERC20Transaction = AvaxTransferTransaction`
+- `scripts/pre_commit.sh`: macOS/Linux equivalent of `pre_commit.ps1`
+- 13 new unit tests (323/323 -> 336/336 total passing)
+
+### Verified on-chain (Fuji Testnet)
+
+First ERC-20 transfer from avalanche_flutter_sdk:
+TX Hash : 0x398ac7a99a3407d1b481d7c61ba5aee298b6cc6d500ecdcb614d12a7742aaa71
+Block : 59,193,138
+Status : Success ✅
+Token : USDC (0x5425890298aed601595a70AB815c96711a31Bc65)
+Amount : 1 USDC
+Confirmed: ~2 seconds (Avalanche Snowman consensus)
+Explorer : https://testnet.snowtrace.io/tx/0x398ac7a99a3407d1b481d7c61ba5aee298b6cc6d500ecdcb614d12a7742aaa71
+
+
+### Status
+
+Phase 2 complete: AVAX and ERC-20 (USDC) transfers operational
+on Fuji Testnet.  
+Not ready for production use.  
+Next: Glacier REST API (balances, transaction history) -> v0.3.x. 
+
 ## [0.1.2-dev]
 
 Phase 2 continued: EIP-1559 AVAX transfers implemented, signed,

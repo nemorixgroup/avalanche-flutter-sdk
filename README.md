@@ -4,14 +4,14 @@
 [![Dart](https://img.shields.io/badge/Dart-3.x-teal.svg)](https://dart.dev)
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-blue.svg)](https://flutter.dev)
 [![CI](https://github.com/nemorixgroup/avalanche-flutter-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/nemorixgroup/avalanche-flutter-sdk/actions)
-[![Status](https://img.shields.io/badge/Status-Phase%202%20In%20Progress-orange.svg)]()
+[![Status](https://img.shields.io/badge/Status-Phase%203%20In%20Progress-orange.svg)]()
 
 The first native Flutter/Dart SDK for the Avalanche network.  
 Pure Dart · No platform channels · Apache 2.0 · pub.dev  
 
 > ⚠️ **Status: Early Development** - API is not stable.  
-> Phase 1 complete: full wallet cycle (mnemonic -> seed -> HD wallet -> addresses).  
-> Current: Phase 2 C-Chain Core - AVAX transfers verified on Fuji Testnet.
+> Phase 1 & 2 complete.  
+> Current: Phase 3 - Glacier REST client (balances, transaction history).
 
 
 ## Planned Features (v1.0.0)
@@ -27,8 +27,8 @@ Pure Dart · No platform channels · Apache 2.0 · pub.dev
 | X/P-Chain address derivation | ✅ Done |
 | C-Chain JSON-RPC client (eth_getBalance, eth_getTransactionCount) | ✅ Done |
 | AVAX transfers (EIP-1559, signing, broadcast) | ✅ Done |
-| ERC-20 transfers (USDC, USDT, approve, allowance) | 🔄 Next |
-| Glacier REST client (balances, transaction history) | ⏳ M3 |
+| ERC-20 transfers (USDC, USDT, approve, allowance) | ✅ Done |
+| Glacier REST client (balances, transaction history) | 🔄 Next |
 | Glacier WebSocket (real-time events, subscriptions) | ⏳ M3 |
 | ERC-721 / ERC-1155 (NFT metadata, ownership) | ⏳ M3 |
 | P-Chain staking (addValidator, addDelegator) | ⏳ M4 |
@@ -52,7 +52,7 @@ documented in [docs-sdk/](https://github.com/nemorixgroup/Avalanche-Knowledge-Ba
 ```yaml
 # pubspec.yaml
 dependencies:
-  avalanche_flutter_sdk: ^0.1.2-dev
+  avalanche_flutter_sdk: ^0.2.0-dev
 ```
 
 ```sh
@@ -237,6 +237,40 @@ print(receipt?['status']); // 0x1 = success
 
 > Verified on Fuji Testnet - block 58,211,707 - confirmed in ~2 seconds ✅
 
+### C-Chain - ERC-20 Token Transfers
+
+```dart
+final client  = CChainClient(network: NetworkConfig.fuji);
+final erc20   = ERC20Client(client);
+
+// USDC contract address (Circle official - Fuji Testnet)
+const usdc = ERC20Constants.usdcFuji;
+
+// Read token info
+final symbol   = await erc20.symbol(usdc);           // "USDC"
+final decimals = await erc20.decimals(usdc);          // 6
+final balance  = await erc20.balanceOf(
+  tokenAddress: usdc,
+  ownerAddress: '0xe9d70EE1...',
+);
+print('Balance: ${balance / BigInt.from(1000000)} $symbol'); // 20.0 USDC
+
+// Transfer 1 USDC
+final nonce  = await client.getTransactionCount('0xe9d70EE1...');
+final txHash = await erc20.transfer(
+  tokenAddress: usdc,
+  toAddress:    '0x0fEB4757...',
+  amount:       BigInt.from(1000000), // 1 USDC (6 decimals)
+  privateKey:   privateKey,
+  nonce:        nonce,
+  chainId:      43113, // Fuji Testnet
+);
+print('TX Hash: $txHash');
+// -> 0x398ac7a99a3407d1b481d7c61ba5aee298b6cc6d500ecdcb614d12a7742aaa71
+```
+
+> Verified on Fuji Testnet - block 59,193,138 - 1 USDC transferred ✅
+
 
 ## Networks
 
@@ -266,6 +300,7 @@ Este SDK esta siendo desarrollado con soporte nativo para la region:
 - Mnemonics BIP-39 en **español** ✅ disponible desde v0.0.3-dev
 - HD wallet + direcciones en las 3 chains ✅ disponible desde v0.1.0-dev
 - Transferencias AVAX en Fuji Testnet ✅ disponible desde v0.1.2-dev
+- Transferencias ERC-20 (USDC) en Fuji Testnet ✅ disponible desde v0.2.0-dev
 - Caso de uso principal: remesas **Estados Unidos hacia Latinoamerica**
 - Desarrollado por [Nemorix Group](https://nemorixpay.com), Ohio, USA
 
