@@ -52,4 +52,10 @@ class NetworkConfig {
     xChainRpcUrl: 'https://api.avax-test.network/ext/bc/X',
     glacierApiUrl: 'https://glacier-api.avax.network',
   );
+
+  /// The C-Chain EVM chain ID as a string for Glacier API calls.
+  ///
+  /// Mainnet: "43114", Fuji: "43113"
+  /// Source: build.avax.network/docs/api-reference/data-api/usage
+  String get chainId => networkId == 1 ? '43114' : '43113';
 }
