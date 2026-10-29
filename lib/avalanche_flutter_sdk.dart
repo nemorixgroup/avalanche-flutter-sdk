@@ -12,30 +12,30 @@ library avalanche_flutter_sdk;
 
 // ---- Chains: C-Chain ----
 export 'src/chains/cchain/cchain_client.dart';
+export 'src/chains/cchain/erc20/erc20_client.dart';
+export 'src/chains/cchain/erc20/erc20_constants.dart';
 export 'src/chains/cchain/gas_estimator.dart';
+export 'src/chains/cchain/glacier/glacier_client.dart';
+export 'src/chains/cchain/glacier/models/glacier_erc20_balance.dart';
+export 'src/chains/cchain/glacier/models/glacier_erc20_transfer.dart';
+export 'src/chains/cchain/glacier/models/glacier_native_balance.dart';
+export 'src/chains/cchain/glacier/models/glacier_page.dart';
+export 'src/chains/cchain/glacier/models/glacier_transaction.dart';
 export 'src/chains/cchain/models/gas_price_option.dart';
 export 'src/chains/cchain/models/gas_price_options.dart';
 export 'src/chains/cchain/transaction/avax_transfer_tx.dart';
-export 'src/chains/cchain/erc20/erc20_client.dart';
-export 'src/chains/cchain/erc20/erc20_constants.dart';
 
 // ---- Client ----
 export 'src/client/avalanche_client.dart';
 export 'src/client/network_config.dart';
 
 // ---- Crypto ----
-export 'src/crypto/ecdsa_signature.dart';
-
-// ---- Crypto: Address ----
 export 'src/crypto/address/evm_address.dart';
 export 'src/crypto/address/xp_address.dart';
-
-// ---- Crypto: HD Wallet ----
+export 'src/crypto/cb58.dart';
+export 'src/crypto/ecdsa_signature.dart';
 export 'src/crypto/hd/hd_wallet.dart';
 export 'src/crypto/hd/seed.dart';
-
-// ---- Crypto: Keys ----
-export 'src/crypto/cb58.dart';
 export 'src/crypto/mnemonic/entropy.dart';
 export 'src/crypto/mnemonic/mnemonic.dart';
 export 'src/crypto/mnemonic/wordlist.dart';

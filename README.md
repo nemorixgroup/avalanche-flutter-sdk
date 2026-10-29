@@ -28,8 +28,8 @@ Pure Dart · No platform channels · Apache 2.0 · pub.dev
 | C-Chain JSON-RPC client (eth_getBalance, eth_getTransactionCount) | ✅ Done |
 | AVAX transfers (EIP-1559, signing, broadcast) | ✅ Done |
 | ERC-20 transfers (USDC, USDT, approve, allowance) | ✅ Done |
-| Glacier REST client (balances, transaction history) | 🔄 Next |
-| Glacier WebSocket (real-time events, subscriptions) | ⏳ M3 |
+| Glacier REST client (balances, transaction history) | ✅ Done |
+| Glacier WebSocket (real-time events, subscriptions) | 🔄 Next|
 | ERC-721 / ERC-1155 (NFT metadata, ownership) | ⏳ M3 |
 | P-Chain staking (addValidator, addDelegator) | ⏳ M4 |
 | P-Chain validator queries | ⏳ M4 |
@@ -52,7 +52,7 @@ documented in [docs-sdk/](https://github.com/nemorixgroup/Avalanche-Knowledge-Ba
 ```yaml
 # pubspec.yaml
 dependencies:
-  avalanche_flutter_sdk: ^0.2.0-dev
+  avalanche_flutter_sdk: ^0.2.1-dev
 ```
 
 ```sh
@@ -271,6 +271,57 @@ print('TX Hash: $txHash');
 
 > Verified on Fuji Testnet - block 59,193,138 - 1 USDC transferred ✅
 
+### Glacier Data API - Balances and History
+
+```dart
+// Without an API key: unauthenticated tier (6,000 CUs/min)
+final glacier = GlacierClient(network: NetworkConfig.fuji);
+
+// With a free API key: 8,000 CUs/min
+// https://build.avax.network/console/utilities/data-api-keys
+final glacierWithKey = GlacierClient(
+  network: NetworkConfig.fuji,
+  apiKey: 'YOUR_API_KEY',
+);
+
+const address = '0xe9d70EE1...';
+
+// Native AVAX balance
+final avax = await glacier.getAvaxBalance(address);
+print('${avax.balanceInAvax} ${avax.symbol}'); // 0.999 AVAX
+
+// ERC-20 balances
+final tokens = await glacier.getErc20Balances(address);
+for (final token in tokens.items) {
+  print('${token.symbol}: ${token.balanceInTokens}'); // USDC: 19.0
+}
+
+// Native transaction history with pagination
+final page = await glacier.getTransactions(address, pageSize: 10);
+for (final tx in page.items) {
+  print('${tx.txHash} ${tx.valueInAvax} AVAX success=${tx.isSuccess}');
+}
+if (page.hasNextPage) {
+  final next = await glacier.getTransactions(
+    address,
+    pageSize: 10,
+    pageToken: page.nextPageToken,
+  );
+}
+
+// ERC-20 transfer history
+final transfers = await glacier.getErc20Transfers(address);
+for (final t in transfers.items) {
+  print('${t.valueInTokens} ${t.tokenSymbol} ${t.from} -> ${t.to}');
+}
+
+// Single transaction by hash
+final tx = await glacier.getTransaction('0x43f9d7b5...');
+print(tx.isSuccess); // true
+```
+
+> Verified on Fuji Testnet - balances and history match Snowtrace ✅
+
 
 ## Networks
 
@@ -301,6 +352,7 @@ Este SDK esta siendo desarrollado con soporte nativo para la region:
 - HD wallet + direcciones en las 3 chains ✅ disponible desde v0.1.0-dev
 - Transferencias AVAX en Fuji Testnet ✅ disponible desde v0.1.2-dev
 - Transferencias ERC-20 (USDC) en Fuji Testnet ✅ disponible desde v0.2.0-dev
+- Balances e historial de transacciones (Glacier) ✅ disponible desde v0.2.1-dev
 - Caso de uso principal: remesas **Estados Unidos hacia Latinoamerica**
 - Desarrollado por [Nemorix Group](https://nemorixpay.com), Ohio, USA
 
