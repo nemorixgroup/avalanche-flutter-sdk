@@ -5,6 +5,79 @@ All notable changes to avalanche_flutter_sdk will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1-dev]
+
+Phase 3 started: Glacier Data API REST client implemented and verified
+against Fuji Testnet. Indexed balances, transaction history and ERC-20
+transfer history are now available without running a node.
+
+### Added
+
+- `GlacierClient`: REST client for the Avalanche Glacier Data API
+  - Optional `apiKey`, sent as the `x-glacier-api-key` header. Without
+    a key the unauthenticated tier applies (6,000 CUs/min); with a free
+    key from the Builder Hub the limit is 8,000 CUs/min
+  - `getAvaxBalance(address)`: native balance (`balances:getNative`)
+  - `getErc20Balances(address, {pageSize, pageToken})`: ERC-20 balances
+    (`balances:listErc20`)
+  - `getTransactions(address, {pageSize, pageToken})`: native transaction
+    history (`transactions:listNative`)
+  - `getErc20Transfers(address, {pageSize, pageToken})`: ERC-20 transfer
+    history (`transactions:listErc20`)
+  - `getTransaction(txHash)`: single transaction, returns the
+    `nativeTransaction` object (`transactions/{txHash}`)
+  - Throws `AvalancheException` on HTTP errors; the 429 message points
+    to the API key signup; non-JSON error bodies (for example a 502 from
+    a gateway) are handled without a `FormatException`
+- Models:
+  - `GlacierNativeBalance`: `balance`, `symbol`, `decimals`,
+    `balanceInAvax`
+  - `GlacierErc20Balance`: `balance`, `symbol`, `decimals`, optional
+    `price` and `priceCurrency`, `balanceInTokens`
+  - `GlacierTransaction`: `txHash`, `from`, `to`, `value`, `gasUsed`,
+    `gasPrice`, `txStatus`, `isSuccess`, `valueInAvax`
+  - `GlacierErc20Transfer`: token transfer event with `logIndex`,
+    `value`, token address, symbol and decimals, `valueInTokens`
+  - `GlacierPage<T>`: `items`, `nextPageToken`, `hasNextPage`
+    (UUID page tokens, valid for 24 hours)
+- `NetworkConfig.chainId`: chain ID as a string for Glacier paths
+  (`"43113"` Fuji, `"43114"` Mainnet)
+- `example/phase3/glacier_read_example.dart`: balances, history and
+  pagination against Fuji Testnet
+- 32 new unit tests (336/336 -> 368/368 total passing)
+
+### Verified
+
+- Response schemas checked against the official Data API reference
+  pages on `build.avax.network` for `balances:getNative`,
+  `balances:listErc20`, `transactions:listNative`,
+  `transactions:listErc20` and `transactions/{txHash}`
+- Live run against Fuji Testnet (no API key) with the SDK test wallet:
+  - AVAX balance 0.999 AVAX and USDC balance 19.0, consistent with the
+    on-chain history (1 AVAX received, 0.001 AVAX sent, 20 USDC
+    received, 1 USDC sent, plus gas)
+  - Transaction hashes and timestamps match Snowtrace for the AVAX
+    transfer (block 58,211,707) and the USDC transfer
+  - Pagination works end to end with `nextPageToken`
+
+### Known limitations
+
+- `getTransaction` returns only `nativeTransaction`. The `erc20Transfers`,
+  `erc721Transfers`, `erc1155Transfers` and `internalTransactions` that
+  the API sends for the same transaction are not modeled yet
+- An ERC-20 contract call appears in `getTransactions` as a native
+  transaction with value 0; the token movement is in
+  `getErc20Transfers`
+- `getErc20Balances` uses the API default of filtering spam tokens
+- The API key header is covered by unit tests only; the live run used
+  the unauthenticated tier
+
+### Status
+
+Phase 3 in progress: Glacier REST client available.
+Not ready for production use.
+Next: Glacier WebSocket (real-time events) -> v0.2.2-dev
+
 ## [0.2.0-dev]
 
 Phase 2 complete: ERC-20 token transfers implemented, signed,
