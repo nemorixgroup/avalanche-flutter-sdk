@@ -637,8 +637,9 @@ void main() {
       final heads = _Collected<NewHead>(client.newHeads());
       final logs = _Collected<EvmLog>(client.logs());
       await pump();
-      first.respond(first.requestId(0), 'H');
-      first.respond(first.requestId(1), 'L');
+      first
+        ..respond(first.requestId(0), 'H')
+        ..respond(first.requestId(1), 'L');
       await pump();
 
       first.serverClose();
@@ -646,8 +647,9 @@ void main() {
       expect(second.request(0)['params'], equals(<Object?>['newHeads']));
       expect(second.request(1)['params'], equals(<Object?>['logs']));
 
-      second.respond(second.requestId(0), 'H2');
-      second.respondError(second.requestId(1), -32000, 'denied');
+      second
+        ..respond(second.requestId(0), 'H2')
+        ..respondError(second.requestId(1), -32000, 'denied');
       await eventually(() => statuses.contains(reconnected));
 
       expect(heads.errors, isEmpty);
@@ -783,8 +785,9 @@ void main() {
       final one = _Collected<NewHead>(client.newHeads());
       final other = _Collected<NewHead>(client.newHeads());
       await pump();
-      first.respond(first.requestId(0), 'A');
-      first.respond(first.requestId(1), 'B');
+      first
+        ..respond(first.requestId(0), 'A')
+        ..respond(first.requestId(1), 'B');
       await pump();
 
       await one.subscription.cancel();
