@@ -35,6 +35,15 @@ class ERC20Constants {
   /// `symbol()` -> 0x95d89b41
   static const List<int> selectorSymbol = [0x95, 0xd8, 0x9b, 0x41];
 
+  /// Topic 0 of the ERC-20 `Transfer(address,address,uint256)` event.
+  ///
+  /// It is `keccak256("Transfer(address,address,uint256)")` and identifies
+  /// `Transfer` logs, for example in an `eth_subscribe("logs")` filter.
+  ///
+  /// Source: https://eips.ethereum.org/EIPS/eip-20
+  static const String transferEventTopic =
+      '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+
   // ---- USDC contract addresses (Circle official) ----
   // Source: https://developers.circle.com/stablecoins/usdc-contract-addresses
 

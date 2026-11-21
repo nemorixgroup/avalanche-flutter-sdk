@@ -29,8 +29,8 @@ Pure Dart · No platform channels · Apache 2.0 · pub.dev
 | AVAX transfers (EIP-1559, signing, broadcast) | ✅ Done |
 | ERC-20 transfers (USDC, USDT, approve, allowance) | ✅ Done |
 | Glacier REST client (balances, transaction history) | ✅ Done |
-| Glacier WebSocket (real-time events, subscriptions) | 🔄 Next|
-| ERC-721 / ERC-1155 (NFT metadata, ownership) | ⏳ M3 |
+| Glacier WebSocket (real-time events, subscriptions) | ✅ Done|
+| ERC-721 / ERC-1155 (NFT metadata, ownership) | 🔄 Next |
 | P-Chain staking (addValidator, addDelegator) | ⏳ M4 |
 | P-Chain validator queries | ⏳ M4 |
 | X-Chain UTXO transfers (native AVAX) | ⏳ M4 |
@@ -52,7 +52,7 @@ documented in [docs-sdk/](https://github.com/nemorixgroup/Avalanche-Knowledge-Ba
 ```yaml
 # pubspec.yaml
 dependencies:
-  avalanche_flutter_sdk: ^0.2.1-dev
+  avalanche_flutter_sdk: ^0.2.2-dev
 ```
 
 ```sh
@@ -322,6 +322,58 @@ print(tx.isSuccess); // true
 
 > Verified on Fuji Testnet - balances and history match Snowtrace ✅
 
+### C-Chain WebSocket - Real-Time Subscriptions
+
+```dart
+const myAddress = '0x0fEB475783E004621b9463Aae30F33665485FafA';
+
+final ws = CChainWebSocketClient(
+  network: NetworkConfig.fuji,
+  // Optional: reconnect with exponential backoff and re-subscribe.
+  reconnectPolicy: const ReconnectPolicy(),
+);
+ws.status.listen((status) => print('status: ${status.name}'));
+await ws.connect();
+
+// New blocks
+final heads = ws.newHeads().listen((head) {
+  print('block ${head.number} at ${head.time.toIso8601String()}');
+});
+
+// Incoming USDC transfers to an address (filtered by the node)
+final incoming = ws
+    .watchIncomingErc20Transfers(
+      tokenAddress: ERC20Constants.usdcFuji,
+      to: myAddress,
+    )
+    .listen((event) {
+  if (event.removed) {
+    // The chain was reorganized: undo what you did for this transfer.
+    return;
+  }
+  print('${event.valueInTokens(6)} USDC from ${event.from} '
+      '(tx ${event.transactionHash})');
+});
+
+// Native AVAX payments: every accepted transaction, filtered by you.
+final accepted = ws.newAcceptedTransactions().listen((tx) {
+  if (tx.to?.toLowerCase() == myAddress.toLowerCase()) {
+    print('${tx.valueInAvax} AVAX from ${tx.from}');
+  }
+});
+
+// Stop listening, then close the connection.
+await incoming.cancel();
+await accepted.cancel();
+await heads.cancel();
+await ws.close();
+```
+
+> Events emitted while the connection was down are not replayed. When `status` reports `reconnected`, fill the gap with `eth_getLogs` or the `GlacierClient`.
+>
+> `newAcceptedTransactions` streams every transaction on the network (about 3.8 tx/s and 5.8 KB/s on Mainnet in a one-minute sample), so prefer `watchIncomingErc20Transfers` for token payments.
+>
+> Verified on Fuji Testnet - a 1 USDC transfer was reported about 2 s after it was sent ✅
 
 ## Networks
 
@@ -353,6 +405,7 @@ Este SDK esta siendo desarrollado con soporte nativo para la region:
 - Transferencias AVAX en Fuji Testnet ✅ disponible desde v0.1.2-dev
 - Transferencias ERC-20 (USDC) en Fuji Testnet ✅ disponible desde v0.2.0-dev
 - Balances e historial de transacciones (Glacier) ✅ disponible desde v0.2.1-dev
+- Detección de pagos entrantes en USDC en tiempo real (WebSocket) ✅ disponible desde v0.2.2-dev
 - Caso de uso principal: remesas **Estados Unidos hacia Latinoamerica**
 - Desarrollado por [Nemorix Group](https://nemorixpay.com), Ohio, USA
 

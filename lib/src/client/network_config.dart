@@ -58,4 +58,15 @@ class NetworkConfig {
   /// Mainnet: "43114", Fuji: "43113"
   /// Source: build.avax.network/docs/api-reference/data-api/usage
   String get chainId => networkId == 1 ? '43114' : '43113';
+
+  /// The C-Chain WebSocket endpoint (`/ext/bc/C/ws`).
+  ///
+  /// `eth_subscribe` subscriptions are only available over WebSocket.
+  /// Both the Mainnet and Fuji URLs were verified against the live public
+  /// API.
+  ///
+  /// Source: https://build.avax.network/docs/rpcs/c-chain
+  String get cChainWsUrl => networkId == 1
+      ? 'wss://api.avax.network/ext/bc/C/ws'
+      : 'wss://api.avax-test.network/ext/bc/C/ws';
 }

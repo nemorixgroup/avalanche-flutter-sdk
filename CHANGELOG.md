@@ -5,6 +5,96 @@ All notable changes to avalanche_flutter_sdk will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2-dev]
+
+Phase 3 continued: C-Chain WebSocket subscriptions implemented and
+verified against Fuji Testnet. Real-time blocks, event logs and incoming
+USDC transfers are available without polling.
+
+### Added
+
+- `CChainWebSocketClient`: real-time subscriptions to the C-Chain
+  (`eth_subscribe`)
+  - `connect()`, `close()`, `isConnected`, `isReconnecting`
+  - `newHeads()`: block headers as `NewHead`
+  - `logs({address, topics})`: event logs as `EvmLog`; a `null` entry in
+    `topics` matches any value
+  - `watchIncomingErc20Transfers({tokenAddress, to})`: ERC-20 `Transfer`
+    events sent to an address as `Erc20TransferEvent`, filtered by the node
+  - `newAcceptedTransactions()`: every accepted transaction as
+    `AcceptedTransaction` (Avalanche-specific, full details)
+  - `newAcceptedTransactionHashes()`: only the transaction hashes
+  - Each subscription is a `Stream`: created when it is listened to and
+    removed (`eth_unsubscribe`) when cancelled; `cancel()` does not wait
+    for the node
+  - Responses are matched by request id, not by position
+  - Heartbeat `pingInterval` (default 20 s) and `connectTimeout`
+    (default 15 s)
+  - A frame that cannot be parsed is delivered as an error event and the
+    subscription stays active
+- Optional automatic reconnection with `ReconnectPolicy`: exponential
+  backoff (initial delay 1 s, doubling up to 30 s, optional
+  `maxAttempts`); active subscriptions are re-established and their
+  streams stay open
+- `WebSocketStatus` and `CChainWebSocketClient.status`: `connected`,
+  `reconnecting`, `reconnected`, `disconnected`
+- Models:
+  - `NewHead`: typed subset of the header plus the full `raw` map, which
+    keeps the Avalanche-specific fields
+  - `EvmLog`: with `removed` for chain reorganizations
+  - `AcceptedTransaction`: legacy and EIP-1559 shapes; `to` is null for
+    contract creation
+  - `Erc20TransferEvent`: decoded `Transfer` event; an ERC-721 `Transfer`
+    (four topics) is rejected with a `FormatException`
+- `WebSocketConnection` and `WebSocketConnector`: replaceable transport
+  (default built on `web_socket_channel`)
+- `NetworkConfig.cChainWsUrl`: C-Chain WebSocket URL (Mainnet and Fuji)
+- `ERC20Constants.transferEventTopic`: topic 0 of the ERC-20 `Transfer`
+  event
+- `web_socket_channel: ^3.0.3` dependency
+- `example/phase3/cchain_websocket_example.dart`: read-only subscriptions,
+  plus a USDC transfer detection example that reads the Fuji key from the
+  `FUJI_PRIVATE_KEY` environment variable
+- 131 new unit tests (368/368 -> 499/499 total passing)
+
+### Verified
+
+- Live run against the public Fuji node: the three subscription kinds
+  (`newHeads`, `logs`, `newAcceptedTransactions`) were confirmed and the
+  notification shapes used as test fixtures come from live frames
+- The Mainnet public WebSocket accepted `newAcceptedTransactions`
+  subscriptions
+- A 1 USDC transfer was reported by `watchIncomingErc20Transfers` 1,954 ms
+  after it was sent (1,777 ms in the earlier raw-frame run); the event
+  carried the same transaction hash
+- An idle connection stayed open for 5 minutes with the 20 s heartbeat,
+  and `eth_unsubscribe` returned `true` at the end
+- `newAcceptedTransactions` volume in one-minute samples: Mainnet 228
+  transactions (3.8/s), 5.76 KB/s with full details against 0.69 KB/s with
+  hashes only; Fuji 34 transactions (0.57/s)
+
+### Known limitations
+
+- Reconnection is covered by unit tests with a simulated transport; it
+  was not exercised against a real network drop
+- Events emitted while the connection was down are not replayed; fill the
+  gap when `status` reports `reconnected`
+- A silent connection drop is detected within one to two heartbeat
+  intervals (20 to 40 s by default)
+- `newAcceptedTransactions` streams every transaction on the network;
+  filter in your handler and expect noticeable data use on Mainnet
+- Native AVAX transfers emit no logs, so there is no dedicated helper yet;
+  use `newAcceptedTransactions` and filter by `to`
+- The public API server documents no WebSocket rate limits; test under
+  your own load
+- `newPendingTransactions` is not supported
+
+### Status
+
+Phase 3 in progress: Glacier REST client and C-Chain WebSocket completed.
+Not ready for production use.
+Next: ERC-721 / ERC-1155 NFT support (`v0.2.3-dev`).
+
 ## [0.2.1-dev]
 
 Phase 3 started: Glacier Data API REST client implemented and verified

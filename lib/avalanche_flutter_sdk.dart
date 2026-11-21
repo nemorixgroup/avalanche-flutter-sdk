@@ -1,10 +1,9 @@
-// ignore_for_file: directives_ordering
-
 /// The first native Flutter/Dart SDK for the Avalanche network.
 ///
 /// Pure Dart implementation covering:
 /// - C-Chain EVM (EIP-1559, ERC-20/721/1155, gas estimation)
-/// - Data API / Glacier (balances, history, NFTs, WebSocket)
+/// - Data API / Glacier (balances, history, NFTs)
+/// - C-Chain WebSocket (real-time subscriptions)
 /// - P-Chain (staking, validators, delegation)
 /// - X-Chain (UTXO native asset transfers, cross-chain)
 /// - Cryptography (secp256k1, CB58, BIP-39 EN/ES, HD key derivation)
@@ -24,6 +23,15 @@ export 'src/chains/cchain/glacier/models/glacier_transaction.dart';
 export 'src/chains/cchain/models/gas_price_option.dart';
 export 'src/chains/cchain/models/gas_price_options.dart';
 export 'src/chains/cchain/transaction/avax_transfer_tx.dart';
+export 'src/chains/cchain/websocket/cchain_websocket_client.dart';
+export 'src/chains/cchain/websocket/models/accepted_transaction.dart';
+export 'src/chains/cchain/websocket/models/erc20_transfer_event.dart';
+export 'src/chains/cchain/websocket/models/evm_log.dart';
+export 'src/chains/cchain/websocket/models/new_head.dart';
+export 'src/chains/cchain/websocket/reconnect_policy.dart';
+export 'src/chains/cchain/websocket/websocket_connection.dart'
+    show WebSocketConnection, WebSocketConnector;
+export 'src/chains/cchain/websocket/websocket_status.dart';
 
 // ---- Client ----
 export 'src/client/avalanche_client.dart';

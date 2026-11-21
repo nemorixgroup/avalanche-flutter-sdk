@@ -5,6 +5,7 @@ import 'phase2/avax_transfer_example.dart';
 import 'phase2/cchain_read_example.dart';
 import 'phase2/erc20_transfer_example.dart';
 import 'phase2/generate_wallets_example.dart';
+import 'phase3/cchain_websocket_example.dart';
 import 'phase3/glacier_read_example.dart';
 
 /// avalanche_flutter_sdk - Quick Start Examples
@@ -56,6 +57,9 @@ Future<void> main() async {
   // GlacierClient REST, balance queries, transaction history,
   // NFT metadata (ERC-721/1155), WebSocket real-time subscriptions
   await glacierReadExample();
+
+  // C-Chain WebSocket: USDC transfer detection (Fuji)
+  await cchainWebSocketExample();
 
   // ---- Phase 4: P-Chain + X-Chain (coming in M4) ----
   // P-Chain staking, validator queries, AddDelegatorTransaction,
